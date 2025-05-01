@@ -2,19 +2,17 @@ import numpy as np
 from cvxopt import matrix, solvers
 
 class SVM:
-    def __init__(self, kernel, gamma, C, coeff0=None, deg=None):
+    def __init__(self, kernel, gamma, C, coef0=None, degree=None):
         self.alphas = None
         self.b = None
         self.K = None
-        self.w = None
-        self.b_alf = None
         self.X = None
         self.Y = None
         self.kernel = kernel
         self.gamma = gamma
         self.C = C
-        self.coeff0 = coeff0
-        self.deg = deg
+        self.coef0 = coef0
+        self.degree = degree
 
     def fit(self, X, y):
         X = np.array(X)
@@ -26,7 +24,7 @@ class SVM:
                        for j in range(X.shape[0])]
                           for i in range(X.shape[0])])
         else:
-            K = np.array([[((self.gamma*np.dot(X[i],X[j])+self.coeff0)**self.deg)
+            K = np.array([[((self.gamma*np.dot(X[i],X[j])+self.coef0)**self.degree)
                        for j in range(X.shape[0])]
                           for i in range(X.shape[0])])
         self.K = K
@@ -41,15 +39,14 @@ class SVM:
         solvers.options['show_progress'] = False
         sol = solvers.qp(matrix(P),matrix(q),matrix(G),matrix(h),matrix(A, tc='d'),matrix(b,tc='d'))
         self.alphas = np.array(sol['x']).flatten()
-        t = (self.alphas*y*X.T).T
-        self.w = np.zeros(X.shape[1])
-        for i in range(X.shape[0]):
-            self.w += t[i]
 
         b_candidates = []
         for i in range(len(self.alphas)):
-            if self.alphas[i] > 0:
-                b_candidates.append(y[i]-np.dot(self.w, X[i]))
+            if 1e-13 < self.alphas[i] < self.C:
+                s = 0
+                for j in range(len(self.alphas)):
+                    s+= self.alphas[j]*y[j]*K[j,i]
+                b_candidates.append(y[i]-s)
         self.b = np.mean(b_candidates)
 
 
@@ -63,5 +60,5 @@ class SVM:
                                  np.exp(-self.gamma*np.sum((self.X[j]-X_test[i])**2)))
                 else:
                     value[i] += (self.alphas[j] * self.Y[j] *
-                                 (self.gamma * np.dot(self.X[j], X_test[i])+self.coeff0) ** self.deg)
+                                 (self.gamma * np.dot(self.X[j], X_test[i])+self.coef0) ** self.degree)
         return np.sign(value)
