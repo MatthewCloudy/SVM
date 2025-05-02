@@ -10,6 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.dummy import DummyClassifier
 import time
 
+
 def load_split_data():
     wine_quality = fetch_ucirepo(id=186)
 
@@ -75,14 +76,8 @@ def calculate_metrics(y_pred, y_test):
 def test_svm_hiperparams_rbf():
     X_train, y_train, X_test, y_test = load_split_data()
 
-    # C_s = [0.1,1,10,100,1000,10000]
-    # gamma_s = [0.0001,0.001,0.01,0.1,1]
-    # C_s = [0.001,0.01, 0.1, 1]
-    # gamma_s = [1,10,100,1000]
-    # C_s = [100]
-    # gamma_s = [0.1]
-    C_s = [100]
-    gamma_s = [0.1]
+    C_s = [0.1, 1, 10, 100, 1000, 10000]
+    gamma_s = [0.0001, 0.001, 0.01, 0.1, 1]
     recall_s = np.zeros((len(C_s), len(gamma_s)))
     precision_s = np.zeros((len(C_s), len(gamma_s)))
     f1_score_s = np.zeros((len(C_s), len(gamma_s)))
@@ -90,43 +85,68 @@ def test_svm_hiperparams_rbf():
 
     for i in range(len(C_s)):
         for j in range(len(gamma_s)):
-            svm = SVM(kernel='rbf', gamma=gamma_s[j], C=C_s[i], coef0=1, degree=3)
-            start = time.time()
+            svm = SVM(kernel="rbf", gamma=gamma_s[j], C=C_s[i], coef0=1, degree=2)
             svm.fit(X_train, y_train)
-            end = time.time()
-            print(f"time: {end - start:.6f} s")
             y_pred = svm.predict(X_test)
             accuracy, precision, recall, f1_score = calculate_metrics(y_pred, y_test)
             print(gamma_s[j], C_s[i])
             print(accuracy, precision, recall, f1_score)
-            accuracy_s[i,j] = accuracy
-            precision_s[i,j] = precision
-            recall_s[i,j] = recall
-            f1_score_s[i,j] = f1_score
+            accuracy_s[i, j] = accuracy
+            precision_s[i, j] = precision
+            recall_s[i, j] = recall
+            f1_score_s[i, j] = f1_score
 
     plt.figure(figsize=(8, 6))
-    sns.heatmap(accuracy_s, annot=True, fmt=".4f", xticklabels=gamma_s, yticklabels=C_s, cmap='viridis')
+    sns.heatmap(
+        accuracy_s,
+        annot=True,
+        fmt=".4f",
+        xticklabels=gamma_s,
+        yticklabels=C_s,
+        cmap="viridis",
+    )
     plt.xlabel("Gamma")
     plt.ylabel("C")
     plt.title("Accuracy w zależności od C i gamma")
     plt.show()
 
     plt.figure(figsize=(8, 6))
-    sns.heatmap(precision_s, annot=True, fmt=".4f", xticklabels=gamma_s, yticklabels=C_s, cmap='viridis')
+    sns.heatmap(
+        precision_s,
+        annot=True,
+        fmt=".4f",
+        xticklabels=gamma_s,
+        yticklabels=C_s,
+        cmap="viridis",
+    )
     plt.xlabel("Gamma")
     plt.ylabel("C")
     plt.title("Precision w zależności od C i gamma")
     plt.show()
 
     plt.figure(figsize=(8, 6))
-    sns.heatmap(recall_s, annot=True, fmt=".4f", xticklabels=gamma_s, yticklabels=C_s, cmap='viridis')
+    sns.heatmap(
+        recall_s,
+        annot=True,
+        fmt=".4f",
+        xticklabels=gamma_s,
+        yticklabels=C_s,
+        cmap="viridis",
+    )
     plt.xlabel("Gamma")
     plt.ylabel("C")
     plt.title("Recall w zależności od C i gamma")
     plt.show()
 
     plt.figure(figsize=(8, 6))
-    sns.heatmap(f1_score_s, annot=True, fmt=".4f", xticklabels=gamma_s, yticklabels=C_s, cmap='viridis')
+    sns.heatmap(
+        f1_score_s,
+        annot=True,
+        fmt=".4f",
+        xticklabels=gamma_s,
+        yticklabels=C_s,
+        cmap="viridis",
+    )
     plt.xlabel("Gamma")
     plt.ylabel("C")
     plt.title("F1-score w zależności od C i gamma")
@@ -146,6 +166,7 @@ def test_log_regr():
     accuracy, precision, recall, f1_score = calculate_metrics(y_pred, y_test)
     print(accuracy, precision, recall, f1_score)
 
+
 def test_knn():
     X_train, y_train, X_test, y_test = load_split_data()
     model = KNeighborsClassifier()
@@ -157,9 +178,10 @@ def test_knn():
     accuracy, precision, recall, f1_score = calculate_metrics(y_pred, y_test)
     print(accuracy, precision, recall, f1_score)
 
+
 def test_dummy():
     X_train, y_train, X_test, y_test = load_split_data()
-    model = DummyClassifier(strategy='uniform', random_state=0)
+    model = DummyClassifier(strategy="uniform", random_state=0)
     start = time.time()
     model.fit(X_train, y_train)
     end = time.time()
@@ -168,7 +190,8 @@ def test_dummy():
     accuracy, precision, recall, f1_score = calculate_metrics(y_pred, y_test)
     print(accuracy, precision, recall, f1_score)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_svm_hiperparams_rbf()
     # test_log_regr()
     # test_knn()
